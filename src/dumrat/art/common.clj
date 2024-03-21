@@ -17,33 +17,36 @@
   (update-component [this time]
     (assoc this :rotation [(* 2 q/PI time)]))
   (draw-component [{rotation :rotation :as this} time]
-    (q/with-translation [0 0])
-      (q/with-rotation rotation)
-        (q/fill 255 0)
-        (q/stroke 200 100 20)
-        (apply q/bezier curve-params)))
+    (q/with-rotation rotation 
+      (q/fill 255 0)
+      (q/stroke 200 100 20)
+      (apply q/bezier curve-params))))
 
-(defrecord Grouping [components]
+(defrecord Grouping [components time-transform]
   QComponent
   (update-component [this time]
-    (assoc this :components (mapv #(update-component % time) components)))
+    (let [time-transform (or time-transform identity)
+          time (time-transform time)]
+      (assoc this :components (mapv #(update-component % time) components))))
   (draw-component [this time]
     (doseq [c components]
       (draw-component c time))))
 
 (comment
-    (update-component (->BezierCurve [10 10 45 200 65 120 80 11] 0) 0)
+    (update-component (->BezierCurve [10 10 45 200 65 120 80 11] 0) [0])
     (update-component (->Grouping [(->BezierCurve [10 10 45 200 65 120 80 11] 0)]) 0.1)
     #_f)
 
 (defn setup []
+  (q/frame-rate 60)
   {:components
    [(->Grouping
-      [(->BezierCurve [10 10 20 20 60 -20 0 50] 0)
-       (->BezierCurve [10 10 45 200 65 120 80 11] 0)
-       (->BezierCurve [200 200 65 89 -50 -43 11 300] 0)
-       (->BezierCurve [45 90 76 -89 -5 -123 45 -11] 0)
-       (->BezierCurve [-200 -200 -250 -150 -180 -240 -100 -100] 0)])]
+      [(->BezierCurve [10 10 20 20 60 -20 0 50] [0])
+       (->BezierCurve [10 10 45 200 65 120 80 11] [0])
+       (->BezierCurve [200 200 65 89 -50 -43 11 300] [0])
+       (->BezierCurve [45 90 76 -89 -5 -123 45 -11] [0])
+       (->BezierCurve [-200 -200 -250 -150 -180 -240 -100 -100] [0])]
+      (fn [t] (/ t 10)))]
    :time 0
    :speed 0.001})
 

@@ -10,26 +10,23 @@
             :radius 100}})
 
 (defn update-state [state]
-  (assoc-in state [:center :rotation-angle] (q/radians (q/frame-count))))
+  (-> state
+      ;(assoc-in [:center :rotation-angle] (q/radians (q/frame-count)))))
+      (assoc-in [:center :rotation-angle] 0)))
 
 (defn circle [diameter thickness]
   (q/stroke-weight thickness)
   (q/ellipse 0 0 diameter diameter))
 
 (defn circles []
-  ;;common
-  (q/stroke 0)
-  ;;Frame rate
-  ;;circles
-  (q/fill 255 0)
   (circle 700 5)
-  (circle 680 3)
+  (circle 680 4)
   (circle 400 5)
   (circle 250 5)
   (circle 200 5))
 
 (defn center-lattice [angle line-count radius]
-  (q/stroke-weight 5)
+  (q/stroke-weight 4)
   (q/rotate angle)
   (dotimes [i line-count]
     (let [a (- (* 2 radius (/ i line-count)) radius)
@@ -45,9 +42,17 @@
   (q/translate 0 0)
   (q/fill 0)
   (q/text-num (q/current-frame-rate) 0 10)
-  (q/translate 400 400)
-  (circles)
-  (center-lattice rotation-angle line-count radius))
+  (q/fill 255 0)
+  (q/stroke 0)
+  ;(q/translate 400 400)
+  ;(circles)
+  ;(center-lattice rotation-angle line-count radius)
+  (q/stroke 255 102 0)
+  (q/line 340 80 40 40)
+  (q/line 360 360 60 320)
+  (q/stroke 0)
+  (q/bezier 340 80 40 40 360 360 60 320));
+   
 
 (defn create-sketch []
   (q/sketch

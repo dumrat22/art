@@ -69,4 +69,12 @@
   data)
 
 (walk-if-not-proxy data)
-;; {:id 10, :name "car", :models [[{:ser [:proxy "some-uuid-string"]}] 1 "s"]}
+
+(defn my-walk [inner outer form]
+  (cond (seq? form) (outer (doall (map inner form)))
+        (coll? form) (outer (into (empty form) (map inner form)))
+        :else (outer form)))
+
+(my-walk #(* 2 %) conj [1 2 3 4 5 6])
+
+(clojure.walk/walk #(* 2 %) identity [[1 2] 3])
