@@ -87,8 +87,8 @@
   (q/text-num t 10 20)
   (apply q/translate translate)
   (q/rotate rotate)
-  #_(doseq [[p1 p2] (get-adjacent-pairs points)]
-     (q/line p1 p2))
+  (doseq [[p1 p2] (get-adjacent-pairs points)]
+   (q/line p1 p2))
   (q/stroke 255 120 0)
   (q/fill 255 0)
   (q/stroke-weight 2)

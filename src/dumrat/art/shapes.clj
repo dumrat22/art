@@ -43,7 +43,6 @@
      :speed speed}))
 
 (defn draw-state [{{bk-color :color} :background angle :angle speed :speed :as state}]
-  ;(apply q/background [(or bk-color 0)])
   (q/background 255)
   (q/stroke 0)
   (q/fill 0)
