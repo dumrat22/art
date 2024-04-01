@@ -1,5 +1,5 @@
 {:deps
  {org.clojure/clojure {:mvn/version "1.11.1"}
   quil/quil {:mvn/version "4.3.1563"}
-  meander/epsilon {:mvn/version "0.0.650"}}
+  clojure2d/clojure2d {:mvn/version "1.4.5"}}
  :paths ["src"]}
