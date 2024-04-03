@@ -52,7 +52,7 @@
 (defmethod c2d/key-released ["petal" (char 27)] [_ _]
   (reset! esc-pressed? true))
 
-(defn draw [canvas window ^long frameno {^long start-time :start-time :as state}]
+(defn draw [canvas window ^long frameno {^long start-time :start-time petal-shape :petal-shape :as state}]
   (if @esc-pressed?
     (do
       (reset! esc-pressed? false)
@@ -80,11 +80,7 @@
           (c2d/ellipse 0 0 242 242))
       (dotimes [i 6]
         (c2d/set-color canvas (+ 120 (* (m/sin (/ frameno m/TWO_PI 60)) 40)) 0 0)
-        (c2d/shape canvas
-                   (symmetric-shape
-                    [[:move [0 0 0 0]]
-                     [:line [0 0 -50 87]]
-                     [:cubic [-50 87 -60 120 0 90 0 120]]]))
+        (c2d/shape canvas petal-shape)
         (c2d/rotate canvas (/ m/TWO_PI 6)))
       ;; rect
       (-> canvas
@@ -105,4 +101,8 @@
                               :setup (fn [c _]
                                        (c2d/set-background c 45 45 41)
                                        {:start-time (. System (nanoTime))
-                                        :texture (c2d/load-image "resources/lotus1.png")})}))
+                                        :texture (c2d/load-image "resources/lotus1.png")
+                                        :petal-shape (symmetric-shape
+                                                       [[:move [0 0 0 0]]
+                                                        [:line [0 0 -50 87]]
+                                                        [:cubic [-50 87 -60 120 0 90 0 120]]])})}))
