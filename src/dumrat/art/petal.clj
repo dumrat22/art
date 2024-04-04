@@ -2,7 +2,8 @@
   (:require [clojure2d.core :as c2d]
             [clojure2d.pixels :as p]
             [clojure2d.extra.overlays :as o]
-            [fastmath.core :as m]))
+            [fastmath.core :as m]
+            [clj-async-profiler.core :as prof]))
 
 ;; make things as fast as possible
 (set! *warn-on-reflection* true)
@@ -64,12 +65,12 @@
           frame-rate (/ (* frameno 1000000000.0) elapsed-time)]
       (-> canvas
           (c2d/scale 2)
-          (c2d/set-color 255 255 255)
+          (c2d/set-color 0 0 0 0)
           (c2d/rect 0 0 (c2d/width canvas) (c2d/height canvas))
-          (c2d/translate 200 200)
+          (c2d/translate 150 150)
           (c2d/rotate (/ frameno m/TWO_PI 60))
           (c2d/flip-y)
-          (c2d/set-color 0 0 0)
+          (c2d/set-color 116 88 20)
           (c2d/ellipse 0 0 250 250)
           (c2d/set-color 255 255 255)
           (c2d/ellipse 0 0 248 248)
@@ -90,37 +91,47 @@
                p/to-pixels
                (p/filter-channels p/gaussian-blur-1)))
       (-> canvas
-              (c2d/set-color 0 0 0)
+              (c2d/set-color 0 0 0 180)
               (c2d/rect -50 -50 100 100)
               (c2d/rotate m/QUARTER_PI)
               (c2d/rect -50 -50 100 100)
-              (c2d/set-color 255 255 255)
+              (c2d/set-color 255 255 255 100)
               (c2d/ellipse 0 0 100 100)
               (c2d/rotate (- m/QUARTER_PI)))
-      ;;Slight blurry noise
+      ;;Slightly blurry noise
       (p/set-canvas-pixels! canvas (p/to-pixels (o/render-noise canvas (:noise state))))
-      (p/set-canvas-pixels! canvas (p/to-pixels (o/render-spots canvas (:spots state))))
-      (-> canvas
-          (c2d/flip-y)
-          (c2d/rotate (- (/ frameno m/TWO_PI 60)))
-          (c2d/translate -150 -150)
-          (c2d/set-color 0 0 0)
-          (c2d/set-stroke 1)
-          (c2d/text (format "%f" frame-rate) 20 20 :left))
+      ;;Spots
+      #_(p/set-canvas-pixels! canvas (p/to-pixels (o/render-spots canvas (:spots state))))
+      ;;Framerate display
+      #_(-> canvas
+            (c2d/flip-y)
+            (c2d/rotate (- (/ frameno m/TWO_PI 60)))
+            (c2d/translate -150 -150)
+            (c2d/set-color 0 0 0)
+            (c2d/set-stroke 1)
+            (c2d/text (format "%f" frame-rate) 20 20 :left))
+      ;; Output images
+      #_(c2d/save canvas (str "out/lotus" frameno ".jpg"))
+      ;; exit after set number of frames
+      #_(when (> frameno 400) (c2d/close-window window))
       state)))
 
-(def window (c2d/show-window {:canvas (c2d/canvas 800 800 :mid)
-                              :window-name "petal"
-                              :hint :mid
-                              :always-on-top? true
-                              :position [0 0]
-                              :draw-fn #'draw
-                              :setup (fn [c _]
-                                       (c2d/set-background c 45 45 41)
-                                       {:start-time (. System (nanoTime))
-                                        :noise (o/noise-overlay 400 400 {:alpha 30})
-                                        :spots (o/spots-overlay 400 400 {:alpha 40 :intensities [10 100 200]})
-                                        :petal-shape (symmetric-shape
-                                                       [[:move [0 0 0 0]]
-                                                        [:line [0 0 -50 87]]
-                                                        [:cubic [-50 87 -60 120 0 90 0 120]]])})}))
+(def window
+  #_(prof/profile)
+  (c2d/show-window {:canvas (c2d/canvas 600 600 :mid)
+                    :window-name "petal"
+                    :hint :mid
+                    :always-on-top? true
+                    :position [0 0]
+                    :draw-fn #'draw
+                    :setup (fn [c _]
+                             (c2d/set-background c 45 45 41)
+                             {:start-time (. System (nanoTime))
+                              :noise (o/noise-overlay 300 300 {:alpha 30})
+                              :spots (o/spots-overlay 300 300 {:alpha 40 :intensities [10 100 200 300]})
+                              :petal-shape (symmetric-shape
+                                             [[:move [0 0 0 0]]
+                                              [:line [0 0 -50 87]]
+                                              [:cubic [-50 87 -60 120 0 100 0 120]]])})}))
+
+#_(prof/serve-ui 8080)
