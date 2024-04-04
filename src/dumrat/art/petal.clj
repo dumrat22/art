@@ -1,5 +1,7 @@
 (ns dumrat.art.petal
   (:require [clojure2d.core :as c2d]
+            [clojure2d.pixels :as p]
+            [clojure2d.extra.overlays :as o]
             [fastmath.core :as m]))
 
 ;; make things as fast as possible
@@ -64,11 +66,8 @@
           (c2d/scale 2)
           (c2d/set-color 255 255 255)
           (c2d/rect 0 0 (c2d/width canvas) (c2d/height canvas))
-          (c2d/set-color 0 0 0)
-          (c2d/set-stroke 1)
-          (c2d/text (format "%f" frame-rate) 20 20 :left)
           (c2d/translate 200 200)
-          (c2d/rotate (/ frameno m/TWO_PI 240))
+          (c2d/rotate (/ frameno m/TWO_PI 60))
           (c2d/flip-y)
           (c2d/set-color 0 0 0)
           (c2d/ellipse 0 0 250 250)
@@ -78,18 +77,36 @@
           (c2d/ellipse 0 0 242 242)
           (c2d/set-color 232 177 40)
           (c2d/ellipse 0 0 242 242))
+      (p/set-canvas-pixels! canvas
+       (->> canvas
+               p/to-pixels
+               (p/filter-channels p/gaussian-blur-5)))
       (dotimes [i 6]
         (c2d/set-color canvas (+ 120 (* (m/sin (/ frameno m/TWO_PI 60)) 40)) 0 0)
         (c2d/shape canvas petal-shape)
         (c2d/rotate canvas (/ m/TWO_PI 6)))
-      ;; rect
+      (p/set-canvas-pixels! canvas
+       (->> canvas
+               p/to-pixels
+               (p/filter-channels p/gaussian-blur-1)))
       (-> canvas
-        (c2d/set-color 0 0 0)
-        (c2d/rect -50 -50 100 100)
-        (c2d/rotate m/QUARTER_PI)
-        (c2d/rect -50 -50 100 100)
-        (c2d/set-color 255 255 255)
-        (c2d/ellipse 0 0 100 100))
+              (c2d/set-color 0 0 0)
+              (c2d/rect -50 -50 100 100)
+              (c2d/rotate m/QUARTER_PI)
+              (c2d/rect -50 -50 100 100)
+              (c2d/set-color 255 255 255)
+              (c2d/ellipse 0 0 100 100)
+              (c2d/rotate (- m/QUARTER_PI)))
+      ;;Slight blurry noise
+      (p/set-canvas-pixels! canvas (p/to-pixels (o/render-noise canvas (:noise state))))
+      (p/set-canvas-pixels! canvas (p/to-pixels (o/render-spots canvas (:spots state))))
+      (-> canvas
+          (c2d/flip-y)
+          (c2d/rotate (- (/ frameno m/TWO_PI 60)))
+          (c2d/translate -150 -150)
+          (c2d/set-color 0 0 0)
+          (c2d/set-stroke 1)
+          (c2d/text (format "%f" frame-rate) 20 20 :left))
       state)))
 
 (def window (c2d/show-window {:canvas (c2d/canvas 800 800 :mid)
@@ -101,7 +118,8 @@
                               :setup (fn [c _]
                                        (c2d/set-background c 45 45 41)
                                        {:start-time (. System (nanoTime))
-                                        :texture (c2d/load-image "resources/lotus1.png")
+                                        :noise (o/noise-overlay 400 400 {:alpha 30})
+                                        :spots (o/spots-overlay 400 400 {:alpha 40 :intensities [10 100 200]})
                                         :petal-shape (symmetric-shape
                                                        [[:move [0 0 0 0]]
                                                         [:line [0 0 -50 87]]
