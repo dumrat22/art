@@ -73,6 +73,7 @@
           (c2d/set-color 0 0 0)
           (c2d/set-stroke 1)
           (c2d/text (format "%f" frame-rate) 20 20 :left))
+    ;;Title
     #_(-> canvas
           (c2d/scale 2)
           (c2d/set-color 180 160 80 220)
