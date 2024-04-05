@@ -23,56 +23,56 @@
         (c2d/flip-y))
     ;;කහ පැහැ පල්ස් වෙන රැස් මාලාව
     (-> canvas
-        (c2d/set-color 116 88 20)
+        (c2d/set-color 116 88 20 120)
         (c2d/ellipse 0 0 o-r o-r)
-        (c2d/set-color 150 100 30)
+        (c2d/set-color 150 100 30 120)
         (c2d/ellipse 0 0 (- o-r 2) (- o-r 2))
-        (c2d/set-color 0 0 0)
+        (c2d/set-color 0 0 0 120)
         (c2d/ellipse 0 0 (- o-r 8) (- o-r 8))
-        (c2d/set-color 232 177 40)
+        (c2d/set-color 232 177 40 120)
         (c2d/ellipse 0 0 (- o-r 8) (- o-r 8)))
     ;;රැස් බොඳ
     (p/set-canvas-pixels! canvas
      (->> canvas
              p/to-pixels
-             (p/filter-channels p/gaussian-blur-3)))
+             (p/filter-channels p/gaussian-blur-5)))
     ;;මැද ඉද්ද මල
     (dotimes [_ 5]
       (c2d/set-color canvas
                      240 240 240
                      (abs (* 180 (m/sin (* 1.5 rot-angle)))))
       (c2d/shape canvas (:ඉද්ද-පෙත්ත state))
-      (c2d/set-color canvas 240 180 40)
-      (c2d/ellipse canvas 0 0 16 16)
+      (c2d/set-color canvas 240 180 40 (abs (* 180 (m/sin (* 1.5 rot-angle)))))
+      ;(c2d/ellipse canvas 0 0 16 16)
       (c2d/rotate canvas (/ m/TWO_PI 5)))
     ;;බොඳ
     (p/set-canvas-pixels! canvas
      (->> canvas
           p/to-pixels
-          (p/filter-channels p/gaussian-blur-1)))
+          (p/filter-channels p/gaussian-blur-2)))
     ;;අනෙක් පැත්තට කරකැවීම
     (c2d/rotate canvas (- m/TWO_PI))
     (c2d/rotate canvas (* 4 rot-angle))
     ;;බාහිර රතු නෙළුම
     (dotimes [_ 6]
-      (c2d/set-color canvas (+ 90 (* (m/sin (/ frameno m/TWO_PI 60)) 40)) 0 0)
+      (c2d/set-color canvas (+ 90 (* (m/sin (/ frameno m/TWO_PI 60)) 40)) 0 0 220)
       (c2d/shape canvas (:නෙලුම්-පෙත්ත state))
       (c2d/rotate canvas (/ m/TWO_PI 6)))
     ;;බොඳ
     (p/set-canvas-pixels! canvas
          (->> canvas
               p/to-pixels
-              (p/filter-channels p/gaussian-blur-1)))
+              (p/filter-channels (p/gaussian-blur 1))))
     ;;Reset all translations
     (c2d/reset-matrix canvas)
     ;;තිත් (noise)
     (-> canvas
       (c2d/image ((:noises state) (mod frameno 20))))
     ;;Framerate display
-    #_(-> canvas
-          (c2d/set-color 0 0 0)
-          (c2d/set-stroke 1)
-          (c2d/text (format "%f" frame-rate) 20 20 :left))
+    (-> canvas
+        (c2d/set-color 0 0 0)
+        (c2d/set-stroke 1)
+        (c2d/text (format "%f" frame-rate) 20 20 :left))
     ;;Title
     #_(-> canvas
           (c2d/scale 2)
@@ -111,5 +111,5 @@
                               ;;ඉද්ද පෙත්ත
                               :ඉද්ද-පෙත්ත (c2d/path-def->shape
                                             [[:move [0 0]]
-                                             [:cubic [-14 20 -35 45 0 50]]
-                                             [:cubic [35 45 14 20 0 0]]])})}))
+                                             [:cubic [-16 20 -35 45 0 50]]
+                                             [:cubic [35 45 16 20 0 0]]])})}))
